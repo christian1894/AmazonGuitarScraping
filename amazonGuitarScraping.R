@@ -1,4 +1,6 @@
 library(rvest)
+library(purrr)
+
 url = "https://www.amazon.com/s?k=guitars&ref=nb_sb_noss"
 webPage= read_html(url)
 selector = ".index\\=25 > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > h2:nth-child(1) > a:nth-child(1)"
@@ -28,11 +30,13 @@ linkGetter = function(url){
   href= html_attr(hrefNode, "href")
   href
 }
+test<-linkGetter(pag[3])
 
 
 links_as_matrix = sapply(pag, linkGetter)
+flat = flatten(links_as_matrix)
 links_as_vector = as.vector(links_as_matrix)
 
-linksVector = paste0("https://www.amazon.com/", links_as_vector)
+linksVector = paste0("https://www.amazon.com/", links_as_matrix)
 head(linksVector)
 
