@@ -28,15 +28,45 @@ linkGetter = function(url){
   hrefNode = html_nodes(webPage, selector)
   hrefText = html_text(hrefNode)
   href= html_attr(hrefNode, "href")
-  href
+  
 }
-test<-linkGetter(pag[3])
 
 
 links_as_matrix = sapply(pag, linkGetter)
 flat = flatten(links_as_matrix)
 links_as_vector = as.vector(links_as_matrix)
 
-linksVector = paste0("https://www.amazon.com/", links_as_matrix)
-head(linksVector)
+linksVector = paste0("https://www.amazon.com/", flat)
+
+#GET PRODUCT NAME
+
+url = "https://www.amazon.com//Donner-DAG-1C-Beginner-Acoustic-Cutaway/dp/B073XC3Y5J/ref=sr_1_1?keywords=guitars&qid=1570681119&sr=8-1"
+page = read_html(url)
+selector = "#productTitle"
+name_node = html_node(page, selector)
+product_name = html_text(name_node)
+product_name
+
+#GET # REVIEWS
+selector = "#averageCustomerReviews_feature_div > div:nth-child(2) > span:nth-child(3) > a:nth-child(1) > span:nth-child(1)"
+review_node = html_node(page, selector)
+product_reviews = html_text(review_node)
+product_reviews
+
+#GET PRICE
+selector = "#priceblock_ourprice"
+price_node = html_node(page, selector)
+product_price = html_text(price_node)
+product_price
+
+#GET DETAILS TABLE
+selector = "#priceblock_ourprice"
+table_node = html_node(page, selector)
+product_details = html_text(table_node)
+product_details
+
+
+
+
+
 
