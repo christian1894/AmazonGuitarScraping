@@ -2,33 +2,32 @@ library(rvest)
 library(purrr)
 
 #PRODUCT URL
-url = "https://www.amazon.es/s?k=guitarra&__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&ref=nb_sb_noss"
+url = "http://books.toscrape.com/index.html"
 pagina<-read_html(url)
-selector = ".index\\=7 > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > h2:nth-child(1) > a:nth-child(1)"
+selector = "li.col-xs-6:nth-child(1) > article:nth-child(1) > h3:nth-child(3) > a:nth-child(1)"
 nodo<-html_node(pagina, selector)
 nodo_text<-html_text(nodo)
 nodo_links<-html_attr(nodo, "href")
 nodo_links
 
-urlcompleta<-paste0("www.amazon.es",nodo_links)
+urlcompleta<-paste0("http://books.toscrape.com/",nodo_links)
 urlcompleta
 
 #PAGINATION
 
-#https://www.amazon.es/s?k=guitarra&page=2&__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&qid=1570986793&ref=sr_pg_2
-#https://www.amazon.es/s?k=guitarra&page=4&__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&qid=1570987191&ref=sr_pg_4
-
+# http://books.toscrape.com/catalogue/page-3.html
 
 library(stringr)
-pag = "https://www.amazon.es/s?k=guitarra&page=4&__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&qid=1570987191&ref=sr_pg_4"
-lista_paginas<-c(1:7)
-pag<-str_replace(pag, "page=4", paste0("page=",lista_paginas))
-pag<-str_replace(pag, "sr_pg_4", paste0("sr_pg_",lista_paginas))
+
+pag = "http://books.toscrape.com/catalogue/page-3.html"
+lista_paginas<-c(1:50)
+pag<-str_replace(pag, "page-3", paste0("page-",lista_paginas))
 pag
 
 #URL LIST AFTER PAGINATION
 dameLinksPagina<-function(url){
-  selector = "div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > h2:nth-child(1) > a:nth-child(1)"
+
+  selector = "article > h3 > a"
   pagina<-read_html(url)
   nodo<-html_nodes(pagina, selector)
   nodo_text<-html_text(nodo)
@@ -37,30 +36,46 @@ dameLinksPagina<-function(url){
   
 }
 
-test = dameLinksPagina(pag[1])
-linksGuit<-sapply(pag, dameLinksPagina)
-flat = flatten(linksGuit)
-vLinkGuitarras<-paste0("https://www.amazon.es/", flat)
-vLinkGuitarras
+test = dameLinksPagina(pag[3])
+linksBooks<-sapply(pag, dameLinksPagina)
+vlink<- as.vector(linksBooks)
+vLinkBooks<-paste0("http://books.toscrape.com/catalogue/", vlink)
+vLinkBooks
 
-#PRODUCT NAME
-url = "https://www.amazon.es//Strong-Wind-Guitarra-ac%C3%BAstica-completo/dp/B06ZZ7SQL5/ref=sr_1_14?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&keywords=guitarra&qid=1570989330&sr=8-14" 
-selector_nombre<-"#productTitle"
+#BOOK NAME
+url = "http://books.toscrape.com/catalogue/deliciously-ella-every-day-quick-and-easy-recipes-for-gluten-free-snacks-packed-lunches-and-simple-meals_801/index.html"
+selector_nombre<-"h1"
 pagina_web<-read_html(url)
 nombre_nodo<-html_node(pagina_web, selector_nombre)
 nombre_texto<-html_text(nombre_nodo)
 nombre_texto
 
 #PRODUCT REVIEWS
-opiniones<-"#acrCustomerReviewText"
+opiniones<-"p.star-rating"
 opiniones_nodo<-html_node(pagina_web, opiniones)
-opiniones_texto<-html_text(opiniones_nodo)
+opiniones_texto<-html_attr(opiniones_nodo, "class")
 opiniones_texto
 
 #PRODUCT PRICE
-selector_precio <-"#productTitle"
+selector_precio <-"p.price_color"
 precio_nodo<-html_node(pagina_web, selector_precio)
 precio_texto<-html_text(precio_nodo)
 precio_texto
 
+#PRODUCT DETAIL
+selector_details = ".table"
+details_nodo<-html_node(pagina_web, selector_details)
+table_tab<-html_table(details_nodo)
+table_tab
+val<-table_tab$X2
+val
+t(val)
+res_table = data.frame(t(val))
+res_table
+table_names = table_tab$X1
+table_names
+colnames(res_table) = table_names
+res_table
+str(res_table)
 
+book_results = c(nombre_texto, precio_texto, as.character(res_table$Availability))
