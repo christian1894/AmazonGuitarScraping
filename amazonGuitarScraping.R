@@ -133,3 +133,15 @@ getArticulo = function(url){
 
 test = getArticulo(vLinkBooks[20])
 test
+
+#RESULTS
+
+results = sapply(vLinkBooks, getArticulo)
+
+
+#CREATE DATAFRAME
+
+results = t(results)
+colnames(results) = c("Book Name", "Rating", "Price", "Availability")
+rownames(results) = c(1:1000)
+write.csv(results, file="bookScraping")
