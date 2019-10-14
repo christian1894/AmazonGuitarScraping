@@ -43,7 +43,7 @@ vLinkBooks<-paste0("http://books.toscrape.com/catalogue/", vlink)
 vLinkBooks
 
 #BOOK NAME
-url = "http://books.toscrape.com/catalogue/deliciously-ella-every-day-quick-and-easy-recipes-for-gluten-free-snacks-packed-lunches-and-simple-meals_801/index.html"
+url = "http://books.toscrape.com/catalogue/tipping-the-velvet_999/index.html"
 selector_nombre<-"h1"
 pagina_web<-read_html(url)
 nombre_nodo<-html_node(pagina_web, selector_nombre)
@@ -54,7 +54,10 @@ nombre_texto
 opiniones<-"p.star-rating"
 opiniones_nodo<-html_node(pagina_web, opiniones)
 opiniones_texto<-html_attr(opiniones_nodo, "class")
-opiniones_texto
+opiniones_texto = substr(opiniones_texto, 13, 17)
+opiniones_number = switch(opiniones_texto, "Zero" = 0,"One" = 1, "Two" = 2, "Three" = 3, "Four" = 4, "Five" = 5,)
+opiniones_number
+
 
 #PRODUCT PRICE
 selector_precio <-"p.price_color"
@@ -78,4 +81,55 @@ colnames(res_table) = table_names
 res_table
 str(res_table)
 
-book_results = c(nombre_texto, precio_texto, as.character(res_table$Availability))
+book_results = c(nombre_texto, precio_texto, opiniones_texto_number, as.character(res_table$Availability))
+book_results
+
+# BOOK DETAILS FUNCTION
+getArticulo = function(url){
+  page = read_html(url)
+  #BOOK NAME
+  selector_nombre<-"h1"
+  nombre_nodo<-html_node(page, selector_nombre)
+  nombre_texto<-html_text(nombre_nodo)
+  
+  #PRODUCT REVIEWS
+  opiniones<-"p.star-rating"
+  opiniones_nodo<-html_node(page, opiniones)
+  opiniones_texto<-html_attr(opiniones_nodo, "class")
+  opiniones_texto = substr(opiniones_texto, 13, 17)
+  opiniones_number = switch(opiniones_texto, "Zero" = 0,"One" = 1, "Two" = 2, "Three" = 3, "Four" = 4, "Five" = 5,)
+
+  #PRODUCT PRICE
+  selector_precio <-"p.price_color"
+  precio_nodo<-html_node(page, selector_precio)
+  precio_texto<-html_text(precio_nodo)
+  #PRODUCT DETAIL
+  selector_details = ".table"
+  details_nodo<-html_node(page, selector_details)
+  if(!is.na(details_nodo)){
+    table_tab<-html_table(details_nodo)
+    val<-table_tab$X2
+    table = data.frame(t(val))
+    table_names = table_tab$X1
+    colnames(table) = table_names
+  } 
+  colnames = c("Availability")
+  if(is.na(details_nodo)){
+    table = data.frame(colnames(colnames))
+    table = rbind(table, c("-1"))
+    colnames(table) = colnames
+  }else{
+    zero = matrix("-1", nrow= 1, ncol= 1)
+    data_frame_zero = data.frame(zero)
+    colnames(data_frame_zero) = colnames
+    availability = as.character(table$Availability)
+    if(length(availability) == 0) availability = "-1"
+    data_frame_zero$Availability = availability
+    table = data_frame_zero
+    colnames(table) = colnames
+  }
+  book = c(nombre_texto, opiniones_number, precio_texto, as.character(table$Availability))
+}
+
+test = getArticulo(vLinkBooks[20])
+test
