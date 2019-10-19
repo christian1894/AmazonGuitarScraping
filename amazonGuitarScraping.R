@@ -81,7 +81,7 @@ colnames(res_table) = table_names
 res_table
 str(res_table)
 
-book_results = c(nombre_texto, precio_texto, opiniones_texto_number, as.character(res_table$Availability))
+book_results = c(nombre_texto, precio_texto, opiniones_number, as.character(res_table$Availability))
 book_results
 
 # BOOK DETAILS FUNCTION
